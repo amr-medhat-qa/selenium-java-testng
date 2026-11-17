@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Fast critical path: only tests in the "smoke" group -->
+<suite name="Smoke" parallel="methods" thread-count="2">
+    <test name="Smoke">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.amrmedhat.qa.tests"/>
+        </packages>
+    </test>
+</suite>
