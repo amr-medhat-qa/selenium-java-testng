@@ -7,6 +7,11 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # Surefire 3.6+ runs TestNG on the JUnit Platform and drops support for TestNG suite XML
+      # (suiteXmlFiles), which this framework uses for parallel config and smoke/regression suites.
+      - dependency-name: org.apache.maven.plugins:maven-surefire-plugin
+        versions: ['>=3.6.0']
     commit-message:
       prefix: deps
 
