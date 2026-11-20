@@ -49,6 +49,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <!-- pinned to 3.5.x: 3.6+ no longer supports TestNG suite XML files (see .github/dependabot.yml) -->
                 <version>3.5.3</version>
                 <configuration>
                     <suiteXmlFiles>
