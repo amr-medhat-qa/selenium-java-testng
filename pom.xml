@@ -54,6 +54,10 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/suites/${suite}</suiteXmlFile>
                     </suiteXmlFiles>
+                    <environmentVariables>
+                        <!-- Selenium Manager: no usage statistics sent from test runs -->
+                        <SE_AVOID_STATS>true</SE_AVOID_STATS>
+                    </environmentVariables>
                     <systemPropertyVariables>
                         <browser>${browser}</browser>
                         <headless>${headless}</headless>
