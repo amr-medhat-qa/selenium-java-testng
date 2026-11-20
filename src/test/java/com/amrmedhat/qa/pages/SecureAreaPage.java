@@ -25,8 +25,7 @@ public class SecureAreaPage extends BasePage {
     }
 
     public LoginPage logout() {
-        click(LOGOUT);
-        wait.until(ExpectedConditions.urlContains("/login"));
+        clickAndWaitForUrl(LOGOUT, "/login");
         return new LoginPage(driver);
     }
 }
