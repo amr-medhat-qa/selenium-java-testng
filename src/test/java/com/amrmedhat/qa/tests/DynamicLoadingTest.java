@@ -1,6 +1,8 @@
 package com.amrmedhat.qa.tests;
 
 import com.amrmedhat.qa.base.BaseTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import com.amrmedhat.qa.pages.DynamicLoadingPage;
 import org.testng.annotations.Test;
 
@@ -8,6 +10,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+@Epic("the-internet.herokuapp.com")
+@Feature("Dynamic loading")
 public class DynamicLoadingTest extends BaseTest {
 
     @Test(groups = "smoke", description = "Hidden element becomes visible after loading")
