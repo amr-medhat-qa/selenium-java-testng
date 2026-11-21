@@ -1,6 +1,10 @@
 package com.amrmedhat.qa.tests;
 
 import com.amrmedhat.qa.base.BaseTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import com.amrmedhat.qa.pages.LoginPage;
 import com.amrmedhat.qa.pages.SecureAreaPage;
 import org.testng.annotations.DataProvider;
@@ -11,8 +15,11 @@ import static com.amrmedhat.qa.data.Credentials.VALID_USERNAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+@Epic("the-internet.herokuapp.com")
+@Feature("Login")
 public class LoginTest extends BaseTest {
 
+    @Severity(SeverityLevel.CRITICAL)
     @Test(groups = "smoke", description = "Valid credentials open the secure area")
     public void validLoginOpensSecureArea() {
         SecureAreaPage secureArea = new LoginPage(driver()).open().loginAs(VALID_USERNAME, VALID_PASSWORD);

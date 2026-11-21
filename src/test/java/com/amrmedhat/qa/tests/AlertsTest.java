@@ -1,12 +1,16 @@
 package com.amrmedhat.qa.tests;
 
 import com.amrmedhat.qa.base.BaseTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import com.amrmedhat.qa.pages.AlertsPage;
 import org.openqa.selenium.Alert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
+@Epic("the-internet.herokuapp.com")
+@Feature("JavaScript alerts")
 public class AlertsTest extends BaseTest {
 
     @Test(groups = "smoke", description = "Simple alert shows its message and is accepted")
