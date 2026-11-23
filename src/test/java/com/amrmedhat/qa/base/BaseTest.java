@@ -48,6 +48,9 @@ public abstract class BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void startBrowser() {
+        // Without this, Allure sees "the same test" on Chrome and Firefox and merges them into one entry.
+        // A parameter makes each browser a separate result (46 instead of 23) that can be filtered.
+        Allure.parameter("browser", Config.browser());
         DRIVER.set(DriverFactory.create());
     }
 

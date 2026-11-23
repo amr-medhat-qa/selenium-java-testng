@@ -112,9 +112,14 @@ jobs:
             done
             # attachments and containers are referenced by file name — copy them untouched
             find "$dir" -type f ! -name '*-result.json' ! -name 'environment.properties' -exec cp -n {} merged/ \;
-            cp -n "$dir/environment.properties" merged/ 2>/dev/null || true
           done
-          ls merged | wc -l
+          # one environment for the whole report: list both browsers, keep the shared values once
+          {
+            echo "Browsers=chrome, firefox (headless)"
+            cat allure-results/*/environment.properties | grep -v '^#' | grep -v '^Browser=' | sort -u
+          } > merged/environment.properties
+          cat merged/environment.properties
+          echo "result files: $(ls merged/*-result.json | wc -l)"
 
       - name: Generate Allure report
         run: npx --yes allure-commandline generate merged --clean -o report
