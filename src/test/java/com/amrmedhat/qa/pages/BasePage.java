@@ -1,6 +1,7 @@
 package com.amrmedhat.qa.pages;
 
 import com.amrmedhat.qa.config.Config;
+import io.qameta.allure.Allure;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
@@ -26,7 +27,7 @@ public abstract class BasePage {
     }
 
     protected void open(String path) {
-        driver.get(Config.baseUrl() + path);
+        Allure.step("Open " + path, () -> driver.get(Config.baseUrl() + path));
     }
 
     protected WebElement visible(By locator) {
@@ -34,7 +35,7 @@ public abstract class BasePage {
     }
 
     protected void click(By locator) {
-        wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        Allure.step("Click " + locator, () -> wait.until(ExpectedConditions.elementToBeClickable(locator)).click());
     }
 
     /** Waits until the browser reports the document as fully loaded. */
@@ -61,9 +62,13 @@ public abstract class BasePage {
     }
 
     protected void type(By locator, String text) {
-        WebElement element = visible(locator);
-        element.clear();
-        element.sendKeys(text);
+        // never write password values into the report
+        String shown = locator.toString().toLowerCase().contains("password") ? "****" : "'" + text + "'";
+        Allure.step("Type " + shown + " into " + locator, () -> {
+            WebElement element = visible(locator);
+            element.clear();
+            element.sendKeys(text);
+        });
     }
 
     protected String text(By locator) {

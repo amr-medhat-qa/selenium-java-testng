@@ -1,12 +1,16 @@
 package com.amrmedhat.qa.tests;
 
 import com.amrmedhat.qa.base.BaseTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import com.amrmedhat.qa.pages.NestedFramesPage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
+@Epic("the-internet.herokuapp.com")
+@Feature("Frames")
 public class FramesTest extends BaseTest {
 
     @DataProvider(name = "topFrames")

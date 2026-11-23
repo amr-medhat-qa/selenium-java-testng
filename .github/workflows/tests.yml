@@ -13,6 +13,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # The application under test is built from the official source at this exact commit (v0.90.2)
+  # and runs inside the job, so results don't depend on the free public site being up and fast.
+  THE_INTERNET_REPO: https://github.com/saucelabs/the-internet.git
+  THE_INTERNET_SHA: dd692f41b39503a8355693d6ce1c49a67955f19b
+  SITE_URL: http://localhost:7080
+
 jobs:
   test:
     name: ${{ matrix.browser }}
@@ -32,9 +39,29 @@ jobs:
           java-version: 21
           cache: maven
 
+      - name: Start the application under test (pinned the-internet build)
+        run: |
+          mkdir the-internet-src && cd the-internet-src
+          git init -q
+          git fetch -q --depth 1 "$THE_INTERNET_REPO" "$THE_INTERNET_SHA"
+          git checkout -q FETCH_HEAD
+          docker build -q -t the-internet .
+          docker run -d --name the-internet -p 7080:5000 the-internet
+          for i in $(seq 1 40); do
+            if curl -sf "$SITE_URL/login" > /dev/null; then echo "the-internet is up after $i attempt(s)"; exit 0; fi
+            sleep 2
+          done
+          docker logs the-internet
+          echo "the-internet did not start" >&2
+          exit 1
+
       # Chrome and Firefox are preinstalled on GitHub runners; Selenium Manager resolves the drivers
       - name: Run tests
-        run: mvn -B test -Dbrowser=${{ matrix.browser }} -Dheadless=true
+        run: mvn -B test -Dbrowser=${{ matrix.browser }} -Dheadless=true -DbaseUrl=${{ env.SITE_URL }}
+
+      - name: Show application log
+        if: failure()
+        run: docker logs --tail 100 the-internet
 
       - name: Upload test reports
         if: ${{ !cancelled() }}
@@ -45,3 +72,78 @@ jobs:
             target/surefire-reports/
             target/screenshots/
           retention-days: 14
+
+      - name: Upload Allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-results-${{ matrix.browser }}
+          path: target/allure-results/
+          retention-days: 1
+
+  report:
+    name: Build Allure report
+    needs: test
+    if: ${{ !cancelled() && needs.test.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Both browsers go into ONE report; the browser name is added as a label so results can be filtered
+      - name: Download Allure results
+        uses: actions/download-artifact@v8
+        with:
+          path: allure-results
+          pattern: allure-results-*
+
+      - name: Merge results from both browsers
+        run: |
+          mkdir -p merged
+          for dir in allure-results/allure-results-*; do
+            browser="${dir##*allure-results-}"
+            for f in "$dir"/*-result.json; do
+              [ -e "$f" ] || continue
+              cp "$f" "merged/${browser}-$(basename "$f")"
+            done
+            # attachments and containers are referenced by file name — copy them untouched
+            find "$dir" -type f ! -name '*-result.json' ! -name 'environment.properties' -exec cp -n {} merged/ \;
+            cp -n "$dir/environment.properties" merged/ 2>/dev/null || true
+          done
+          ls merged | wc -l
+
+      - name: Generate Allure report
+        run: npx --yes allure-commandline generate merged --clean -o report
+
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report
+          path: report/
+          retention-days: 14
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: report/
+
+  deploy:
+    name: Publish report to GitHub Pages
+    needs: report
+    if: ${{ !cancelled() && needs.report.result == 'success' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,6 +1,8 @@
 package com.amrmedhat.qa.tests;
 
 import com.amrmedhat.qa.base.BaseTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import com.amrmedhat.qa.pages.DropdownPage;
 import org.testng.annotations.Test;
 
@@ -9,6 +11,8 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+@Epic("the-internet.herokuapp.com")
+@Feature("Dropdown")
 public class DropdownTest extends BaseTest {
 
     @Test(description = "Default state shows the placeholder and offers two options")
